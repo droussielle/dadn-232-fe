@@ -4,11 +4,11 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 
 import { Box } from '@mui/material';
+import { Route, Routes } from 'react-router-dom';
 
 import ClippedDrawer from './components/drawer';
 import MenuAppBar from './components/navbar';
 import HomePage from './pages/Home/home';
-import { Routes, Route } from 'react-router-dom';
 import { LoginPage } from './pages/Login';
 
 function App() {

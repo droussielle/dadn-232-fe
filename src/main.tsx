@@ -8,11 +8,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
-// import App from './App';
-import Root from './pages/root';
+import ErrorPage from './pages/error';
 import HomePage from './pages/home';
 import LoginPage from './pages/login';
-import ErrorPage from './pages/error';
+// import App from './App';
+import Root from './pages/root';
 
 // ReactDOM.render(
 //   <React.StrictMode>
