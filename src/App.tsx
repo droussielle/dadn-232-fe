@@ -8,6 +8,8 @@ import { Box } from '@mui/material';
 import ClippedDrawer from './components/drawer';
 import MenuAppBar from './components/navbar';
 import HomePage from './pages/Home/home';
+import { Routes, Route } from 'react-router-dom';
+import { LoginPage } from './pages/Login';
 
 function App() {
   return (
