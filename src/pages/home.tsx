@@ -1,4 +1,5 @@
 import { Box } from '@mui/material';
+import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -6,9 +7,9 @@ import Stack from '@mui/system/Stack';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
-import ActivityLogTable from '../../components/ActivityLogTable';
-import DeviceCard from '../../components/device';
-import StatusCard from '../../components/status';
+import ActivityLogTable from '../components/ActivityLogTable';
+import DeviceCard from '../components/device';
+import StatusCard from '../components/status';
 
 export default function HomePage() {
   const [temperature, setTemperature] = useState([]);
@@ -16,6 +17,8 @@ export default function HomePage() {
   const [motionSensing, setMotion] = useState([]);
   const [sensors, setSensors] = useState([]);
   const [devices, setDevices] = useState([]);
+  const [temp_threshold, setTempThreshold] = useState([]);
+  const [brightness_threshold, setBrightnessThreshold] = useState([]);
 
   const fetchInfo = () => {
     const bearer_token = `Bearer ${localStorage.getItem('token')}`;
@@ -27,7 +30,6 @@ export default function HomePage() {
     axios
       .get(`http://localhost:3001/api/record/getSensorData/temp-sensor`)
       .then((res) => {
-        // console.log(res.data[0])
         setTemperature(res.data[0]);
       });
     axios
@@ -43,7 +45,10 @@ export default function HomePage() {
     });
     axios.get(`http://localhost:3001/api/device/getAllDevices`, config).then((res) => {
       setDevices(res.data);
-      // console.log(res.data);
+      setTempThreshold(res.data[1].thresholdValue);
+      setBrightnessThreshold(res.data[0].thresholdValue);
+      // console.log(temperature, brightness);
+      // console.log(temp_threshold, brightness_threshold);
     });
     return 0;
   };
@@ -62,6 +67,16 @@ export default function HomePage() {
       sx={{ flexGrow: 1, bgcolor: 'background.default', px: 2, paddingLeft: 34 }}
     >
       <Toolbar />
+      {temperature.value > temp_threshold ? (
+        <Alert severity="warning" id="temp_warning">
+          Cảnh báo! Nhiệt độ hiện tại vượt quá ngưỡng cho phép
+        </Alert>
+      ) : null}
+      {brightness.value > brightness_threshold ? (
+        <Alert severity="warning" id="brightness_warning">
+          Cảnh báo! Độ sáng hiện tại vượt quá ngưỡng cho phép
+        </Alert>
+      ) : null}
       <Stack direction="row" spacing={2}>
         <StatusCard
           item="temp"

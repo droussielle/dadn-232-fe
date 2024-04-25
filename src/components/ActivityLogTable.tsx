@@ -20,12 +20,17 @@ function ActivityLogTable() {
   const [userId, setUserId] = useState('');
 
   useEffect(() => {
-    fetchData();
+    const interval = setInterval(() => fetchData(), 500);
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/log/getAllLog?rowsPerPage=100');
+      const response = await axios.get(
+        'http://localhost:3001/api/log/getAllLog?rowsPerPage=100',
+      );
       setActivityLogs(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -47,7 +52,9 @@ function ActivityLogTable() {
 
   const handleFilterByUser = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/api/log/search/${userId}?rowsPerPage=100`);
+      const response = await axios.get(
+        `http://localhost:3001/api/log/search/${userId}?rowsPerPage=100`,
+      );
       setActivityLogs(response.data);
     } catch (error) {
       console.error('Error filtering data by user:', error);
@@ -102,7 +109,9 @@ function ActivityLogTable() {
         </Button>
       </div>
       <br />
-      <Button variant="contained" onClick={handleReset}>Reset</Button>
+      <Button variant="contained" onClick={handleReset}>
+        Reset
+      </Button>
       <br />
       <br />
       <br />
@@ -122,7 +131,7 @@ function ActivityLogTable() {
               <TableRow key={log.id}>
                 <TableCell>{log.id}</TableCell>
                 <TableCell>{log.action}</TableCell>
-                <TableCell>{log.createdAt}</TableCell>
+                <TableCell>{new Date(log.createdAt).toLocaleString('en-GB')}</TableCell>
                 <TableCell>{log.user.username}</TableCell>
                 <TableCell>{log.userId}</TableCell>
               </TableRow>
