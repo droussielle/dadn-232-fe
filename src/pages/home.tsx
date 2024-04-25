@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 
 import ActivityLogTable from '../components/ActivityLogTable';
 import DeviceCard from '../components/device';
+import SensorChart from '../components/SensorChart';
 import StatusCard from '../components/status';
 
 export default function HomePage() {
@@ -136,6 +137,18 @@ export default function HomePage() {
         }}
       >
         <Typography variant="h6">Thống kê</Typography>
+        <Button>Xem tất cả</Button>
+      </Box>
+      <SensorChart />
+      <Box
+        sx={{
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Typography variant="h6">Lịch sử hoạt động</Typography>
         <Button>Xem tất cả</Button>
       </Box>
       <ActivityLogTable />
