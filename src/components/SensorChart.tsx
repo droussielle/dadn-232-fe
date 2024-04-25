@@ -1,4 +1,4 @@
-import { FormControl, InputLabel,MenuItem, Select } from '@mui/material';
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import axios from 'axios';
 import { Chart, registerables } from 'chart.js';
 import React, { useEffect, useState } from 'react';
@@ -112,7 +112,9 @@ const SensorChart = () => {
       <h4>Sensor Chart</h4>
 
       <FormControl sx={{ minWidth: 120 }}>
-        <InputLabel sx={{ marginBottom: 40 }} id="sensor-select-label">Select Sensor</InputLabel>
+        <InputLabel sx={{ marginBottom: 40 }} id="sensor-select-label">
+          Select Sensor
+        </InputLabel>
         <Select
           labelId="sensor-select-label"
           value={selectedSensor}
