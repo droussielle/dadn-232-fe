@@ -25,7 +25,9 @@ function ActivityLogTable() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/log/getAllLog?rowsPerPage=100');
+      const response = await axios.get(
+        'http://localhost:3001/api/log/getAllLog?rowsPerPage=100',
+      );
       setActivityLogs(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -47,7 +49,9 @@ function ActivityLogTable() {
 
   const handleFilterByUser = async () => {
     try {
-      const response = await axios.get(`http://localhost:3001/api/log/search/${userId}?rowsPerPage=100`);
+      const response = await axios.get(
+        `http://localhost:3001/api/log/search/${userId}?rowsPerPage=100`,
+      );
       setActivityLogs(response.data);
     } catch (error) {
       console.error('Error filtering data by user:', error);
@@ -102,7 +106,9 @@ function ActivityLogTable() {
         </Button>
       </div>
       <br />
-      <Button variant="contained" onClick={handleReset}>Reset</Button>
+      <Button variant="contained" onClick={handleReset}>
+        Reset
+      </Button>
       <br />
       <br />
       <br />
