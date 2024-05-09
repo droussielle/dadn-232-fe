@@ -1,26 +1,19 @@
 import { Height } from '@mui/icons-material';
-import {
-  Button,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TextField,
-} from '@mui/material';
+import { Button, TextField } from '@mui/material';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
+import PaginatedTable from './PaginatedTable';
 
 function ActivityLogTable() {
   const [activityLogs, setActivityLogs] = useState([]);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [userId, setUserId] = useState('');
+  const filtered = useRef(false);
 
   useEffect(() => {
-    const interval = setInterval(() => fetchData(), 500);
+    const interval = setInterval(() => !filtered.current && fetchData(), 1000);
     return () => {
       clearInterval(interval);
     };
@@ -28,9 +21,7 @@ function ActivityLogTable() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(
-        'http://localhost:3001/api/log/getAllLog?rowsPerPage=100',
-      );
+      const response = await axios.get(`http://localhost:3001/api/log/getAllLog`);
       setActivityLogs(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -42,9 +33,10 @@ function ActivityLogTable() {
       //   console.log(startDate);
       //   console.log(endDate);
       const response = await axios.get(
-        `http://localhost:3001/api/log/search/date?startDate=${startDate}&endDate=${endDate}?rowsPerPage=100`,
+        `http://localhost:3001/api/log/search/date?startDate=${startDate}&endDate=${endDate}`,
       );
       setActivityLogs(response.data);
+      filtered.current = true;
     } catch (error) {
       console.error('Error searching data:', error);
     }
@@ -56,6 +48,7 @@ function ActivityLogTable() {
         `http://localhost:3001/api/log/search/${userId}?rowsPerPage=100`,
       );
       setActivityLogs(response.data);
+      filtered.current = true;
     } catch (error) {
       console.error('Error filtering data by user:', error);
     }
@@ -66,6 +59,7 @@ function ActivityLogTable() {
     setEndDate('');
     setUserId('');
     fetchData();
+    filtered.current = false;
   };
 
   return (
@@ -95,14 +89,10 @@ function ActivityLogTable() {
         <br />
         <TextField
           style={{ marginRight: '30px' }}
-          label="User ID"
+          label="User Name"
           type="text"
-          inputMode="numeric"
-          pattern="\d*"
-          min="1"
-          step="1"
           value={userId}
-          onChange={(e) => setUserId(e.target.value * 1)}
+          onChange={(e) => setUserId(e.target.value)}
         />
         <Button variant="contained" onClick={handleFilterByUser}>
           Filter by User
@@ -115,30 +105,7 @@ function ActivityLogTable() {
       <br />
       <br />
       <br />
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell>Action</TableCell>
-              <TableCell>Created At</TableCell>
-              <TableCell>User name</TableCell>
-              <TableCell>User ID</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {activityLogs.map((log) => (
-              <TableRow key={log.id}>
-                <TableCell>{log.id}</TableCell>
-                <TableCell>{log.action}</TableCell>
-                <TableCell>{new Date(log.createdAt).toLocaleString('en-GB')}</TableCell>
-                <TableCell>{log.user.username}</TableCell>
-                <TableCell>{log.userId}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <PaginatedTable data={activityLogs} />
       <br />
       <br />
     </div>

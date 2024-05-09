@@ -12,11 +12,18 @@ import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 
 const drawerWidth = 240;
 
 export default function ClippedDrawer() {
+  const routes = {
+    Home: '/',
+    Devices: '/devices',
+    Report: '/report',
+    History: '/history',
+  };
+  const { pathname } = useLocation();
   return (
     <Drawer
       variant="permanent"
@@ -30,15 +37,15 @@ export default function ClippedDrawer() {
       <Box sx={{ overflow: 'auto' }}>
         <List>
           {[
-            ['Trang chủ', '<HomeIcon />', '/home'],
+            ['Trang chủ', '<HomeIcon />', '/'],
             ['Thiết bị', '', '/devices'],
-            ['Thống kê', '', '/stats'],
-            ['Quản trị', '', '/manage'],
+            ['Thống kê', '', '/report'],
+            ['Lịch sử hoạt động', '', '/history'],
           ].map((item, index) => (
             <ListItem key={item[0]} disablePadding component={Link} to={item[2]}>
-              <ListItemButton>
+              <ListItemButton selected={item[3] === pathname}>
                 {/* <ListItemIcon>{item[1]}</ListItemIcon> */}
-                <ListItemText primary={item[0]} />
+                <ListItemText primary={item[0]} sx={{ textDecoration: 'none' }} />
               </ListItemButton>
             </ListItem>
           ))}

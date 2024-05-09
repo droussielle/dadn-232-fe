@@ -1,18 +1,27 @@
+import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
+import DirectionsRunIcon from '@mui/icons-material/DirectionsRun';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import ShowerIcon from '@mui/icons-material/Shower';
 import { Box } from '@mui/material';
 import Alert from '@mui/material/Alert';
+import Backdrop from '@mui/material/Backdrop';
 import Button from '@mui/material/Button';
-import Toolbar from '@mui/material/Toolbar';
+import CircularProgress from '@mui/material/CircularProgress';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/system/Stack';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import ActivityLogTable from '../components/ActivityLogTable';
-import DeviceCard from '../components/device';
+import DeviceActivity from '../components/DeviceActivity';
+import DeviceCard from '../components/deviceCard';
 import SensorChart from '../components/SensorChart';
-import StatusCard from '../components/status';
+import StatusCard from '../components/statusCard';
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const [temperature, setTemperature] = useState([]);
   const [brightness, setBrightness] = useState([]);
   const [motionSensing, setMotion] = useState([]);
@@ -20,6 +29,7 @@ export default function HomePage() {
   const [devices, setDevices] = useState([]);
   const [temp_threshold, setTempThreshold] = useState([]);
   const [brightness_threshold, setBrightnessThreshold] = useState([]);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   const fetchInfo = () => {
     const bearer_token = `Bearer ${localStorage.getItem('token')}`;
@@ -32,30 +42,59 @@ export default function HomePage() {
       .get(`http://localhost:3001/api/record/getSensorData/temp-sensor`)
       .then((res) => {
         setTemperature(res.data[0]);
-      });
+      })
+      .catch((err) => {});
     axios
       .get(`http://localhost:3001/api/record/getSensorData/light-sensor`)
       .then((res) => {
         setBrightness(res.data[0]);
+      })
+      .catch((err) => {});
+    axios
+      .get(`http://localhost:3001/api/record/getSensorData/pir-sensor`)
+      .then((res) => {
+        setMotion(res.data[0]);
+      })
+      .catch((err) => {});
+    axios
+      .get(`http://localhost:3001/api/record/getAllSensors`)
+      .then((res) => {
+        setSensors(res.data);
+      })
+      .catch((err) => {});
+    axios
+      .get(`http://localhost:3001/api/device/getAllDevices`, config)
+      .then((res) => {
+        setDevices(res.data);
+        // devices[0].image = '/led.png';
+        // devices[1].image = '/led.png';
+        setTempThreshold(res.data[0].thresholdValue);
+        setBrightnessThreshold(res.data[1].thresholdValue);
+      })
+      .catch((err) => {
+        logOut('Vui lòng đăng nhập lại để truy cập vào ứng dụng');
       });
-    axios.get(`http://localhost:3001/api/record/getSensorData/pir-sensor`).then((res) => {
-      setMotion(res.data[0]);
-    });
-    axios.get(`http://localhost:3001/api/record/getAllSensors`).then((res) => {
-      setSensors(res.data);
-    });
-    axios.get(`http://localhost:3001/api/device/getAllDevices`, config).then((res) => {
-      setDevices(res.data);
-      setTempThreshold(res.data[1].thresholdValue);
-      setBrightnessThreshold(res.data[0].thresholdValue);
-      // console.log(temperature, brightness);
-      // console.log(temp_threshold, brightness_threshold);
-    });
+    if (temperature && brightness && motionSensing && sensors && devices) {
+      setHasLoaded(true);
+    }
     return 0;
   };
 
+  const logOut = (error_message) => {
+    localStorage.clear();
+    navigate(
+      '/login',
+      error_message && {
+        state: { error: true, message: error_message },
+      },
+    );
+  };
+
   useEffect(() => {
-    const interval = setInterval(() => fetchInfo(), 1000);
+    if (!localStorage.getItem('token')) {
+      logOut('Vui lòng đăng nhập lại để truy cập vào ứng dụng');
+    }
+    const interval = setInterval(() => fetchInfo(), 3000);
     return () => {
       clearInterval(interval);
     };
@@ -67,30 +106,38 @@ export default function HomePage() {
       spacing={3}
       sx={{ flexGrow: 1, bgcolor: 'background.default', px: 2, paddingLeft: 34 }}
     >
-      <Toolbar />
+      <Backdrop
+        sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={!hasLoaded}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
       {temperature.value > temp_threshold ? (
         <Alert severity="warning" id="temp_warning">
-          Cảnh báo! Nhiệt độ hiện tại vượt quá ngưỡng cho phép
+          Cảnh báo! Nhiệt độ hiện tại vượt quá ngưỡng
         </Alert>
       ) : null}
       {brightness.value > brightness_threshold ? (
         <Alert severity="warning" id="brightness_warning">
-          Cảnh báo! Độ sáng hiện tại vượt quá ngưỡng cho phép
+          Cảnh báo! Độ sáng hiện tại vượt quá ngưỡng
         </Alert>
       ) : null}
       <Stack direction="row" spacing={2}>
         <StatusCard
-          item="temp"
-          value={temperature.value}
+          title="Nhiệt độ hiện tại"
+          icon={<DeviceThermostatIcon />}
+          value={temperature.value + '°C'}
           lastUpdated={temperature.createdAt}
         />
         <StatusCard
-          item="brightness"
-          value={brightness.value}
+          title="Độ sáng hiện tại"
+          icon={<LightModeIcon />}
+          value={brightness.value + '%'}
           lastUpdated={brightness.createdAt}
         />
         <StatusCard
-          item="motion"
+          title="Có người"
+          icon={<DirectionsRunIcon />}
           value={motionSensing.value}
           lastUpdated={motionSensing.createdAt}
         />
@@ -104,12 +151,23 @@ export default function HomePage() {
         }}
       >
         <Typography variant="h6">Các thiết bị cảm biến</Typography>
-        <Button>Xem tất cả</Button>
+        <Button
+          onClick={() => {
+            navigate('/devices');
+          }}
+        >
+          Xem tất cả
+        </Button>
       </Box>
       <Stack direction="row" spacing={2}>
         {sensors.map((item, index) => (
-          // <DeviceCard item={"lights"} name={"hello"} type={"sensor"} />
-          <DeviceCard key={index} item="sensor" name={item.name} />
+          <DeviceCard
+            key={index}
+            item="sensor"
+            name={item.name}
+            id={item.id}
+            icon={<LightbulbIcon />}
+          />
         ))}
       </Stack>
       <Box
@@ -121,11 +179,25 @@ export default function HomePage() {
         }}
       >
         <Typography variant="h6">Các thiết bị đầu ra</Typography>
-        <Button>Xem tất cả</Button>
+        <Button
+          onClick={() => {
+            navigate('/devices');
+          }}
+        >
+          Xem tất cả
+        </Button>
       </Box>
       <Stack direction="row" spacing={2}>
+        {/* {console.log(devices)} */}
         {devices.map((item, index) => (
-          <DeviceCard key={index} item="device" name={item.name} id={item.id} />
+          <DeviceCard
+            key={index}
+            item="device"
+            name={item.name}
+            id={item.id}
+            icon={<ShowerIcon />}
+            // imagePath={item.image}
+          />
         ))}
       </Stack>
       <Box
@@ -137,9 +209,16 @@ export default function HomePage() {
         }}
       >
         <Typography variant="h6">Thống kê</Typography>
-        <Button>Xem tất cả</Button>
+        <Button
+          onClick={() => {
+            navigate('/report');
+          }}
+        >
+          Xem tất cả
+        </Button>
       </Box>
       <SensorChart />
+      <DeviceActivity />
       <Box
         sx={{
           width: '100%',
@@ -149,7 +228,13 @@ export default function HomePage() {
         }}
       >
         <Typography variant="h6">Lịch sử hoạt động</Typography>
-        <Button>Xem tất cả</Button>
+        <Button
+          onClick={() => {
+            navigate('/history');
+          }}
+        >
+          Xem tất cả
+        </Button>
       </Box>
       <ActivityLogTable />
     </Stack>

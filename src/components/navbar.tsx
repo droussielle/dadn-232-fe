@@ -12,10 +12,12 @@ import Switch from '@mui/material/Switch';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export default function MenuAppBar() {
   const [auth, setAuth] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const navigate = useNavigate();
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAuth(event.target.checked);
@@ -27,6 +29,11 @@ export default function MenuAppBar() {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const logOut = () => {
+    localStorage.clear();
+    navigate('/login');
   };
 
   return (
@@ -59,7 +66,7 @@ export default function MenuAppBar() {
                 fontSize: 16,
               }}
             >
-              Lê Nguyên Chương
+              {localStorage.getItem('name')}
             </Button>
             <Menu
               id="menu-appbar"
@@ -76,8 +83,7 @@ export default function MenuAppBar() {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              <MenuItem onClick={handleClose}>Profile</MenuItem>
-              <MenuItem onClick={handleClose}>My account</MenuItem>
+              <MenuItem onClick={logOut}>Đăng xuất</MenuItem>
             </Menu>
           </div>
         )}
